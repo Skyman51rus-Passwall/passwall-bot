@@ -1,10 +1,14 @@
-# PassWall Bot
+# 🤖 PassWall Bot
 
-Автоматический мониторинг и переключение серверов PassWall с Telegram ботом.
+**Автоматический мониторинг и переключение серверов PassWall с Telegram ботом.**
 
-## Установка одной командой
+[![GitHub](https://img.shields.io/badge/GitHub-Skyman51rus--Passwall-blue)](https://github.com/Skyman51rus-Passwall/passwall-bot)
 
-Подключись к роутеру по SSH и выполни:
+---
+
+## 🚀 Установка одной командой
+
+Подключись к роутеру по SSH (PuTTY) и выполни:
 
 ```bash
 curl -s https://raw.githubusercontent.com/Skyman51rus-Passwall/passwall-bot/main/install.sh | sh
