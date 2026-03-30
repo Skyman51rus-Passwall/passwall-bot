@@ -57,8 +57,8 @@ echo ""
 echo "📌 КАК СОЗДАТЬ БОТА:"
 echo "   1. Открой Telegram, найди @BotFather"
 echo "   2. Отправь команду /newbot"
-echo "   3. Введи имя бота (например: MyRouterBot)"
-echo "   4. Введи username (должен заканчиваться на _bot)"
+echo "   3. Введи имя бота, например MyRouterBot"
+echo "   4. Введи username, должно заканчиваться на _bot"
 echo "   5. Скопируй полученный токен"
 echo ""
 printf "🔑 Введи токен бота: "
@@ -68,7 +68,7 @@ echo ""
 echo "📌 КАК ПОЛУЧИТЬ CHAT ID:"
 echo "   1. Найди @userinfobot в Telegram"
 echo "   2. Отправь ему команду /start"
-echo "   3. Скопируй свой ID (цифры)"
+echo "   3. Скопируй свой ID цифрами"
 echo ""
 printf "🆔 Введи свой Chat ID: "
 read CHAT_ID
@@ -82,10 +82,10 @@ read PW_VER
 
 echo ""
 echo "📌 НАСТРОЙКИ МОНИТОРИНГА:"
-printf "⏱️  Интервал проверки (мин, по умолч 5, 0=отключить): "
+printf "⏱️  Интервал проверки в минутах, по умолч 5: "
 read CHECK_INT
 [ -z "$CHECK_INT" ] && CHECK_INT=5
-printf "⚡ Максимальная задержка (мс, по умолч 1500): "
+printf "⚡ Максимальная задержка в мс, по умолч 1500: "
 read MAX_LAT
 [ -z "$MAX_LAT" ] && MAX_LAT=1500
 
@@ -368,7 +368,11 @@ echo "📱 Открой Telegram и отправь боту: /status"
 echo "🔘 Под сообщением появятся КНОПКИ!"
 echo ""
 echo "📌 ТВОИ НАСТРОЙКИ:"
-echo "   Версия для бота: $([ "$PW_VER" = "2" ] && echo "PassWall 2" || echo "PassWall 1")"
+if [ "$PW_VER" = "2" ]; then
+    echo "   Версия для бота: PassWall 2"
+else
+    echo "   Версия для бота: PassWall 1"
+fi
 echo "   Интервал: $CHECK_INTERVAL мин"
 echo "   Задержка: $MAX_LAT мс"
 echo ""
