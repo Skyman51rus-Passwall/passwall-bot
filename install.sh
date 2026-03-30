@@ -6,6 +6,7 @@ echo "  PassWall Bot Installer"
 echo "========================================="
 echo ""
 
+# Запрашиваем данные
 printf "Bot token from @BotFather: "
 read BOT_TOKEN
 
@@ -26,6 +27,7 @@ read MAX_LAT
 echo ""
 echo "Installing..."
 
+# Конфиг
 cat > /root/passwall-bot.conf << CFG
 CHECK_INTERVAL=$CHECK_INT
 MAX_LATENCY=$MAX_LAT
@@ -33,6 +35,7 @@ BOT_TOKEN="$BOT_TOKEN"
 CHAT_ID="$CHAT_ID"
 CFG
 
+# Основной скрипт мониторинга
 if [ "$PW_VER" = "2" ]; then
 cat > /root/passwall-auto-switch.sh << 'SCRIPT'
 #!/bin/sh
@@ -110,6 +113,7 @@ SCRIPT
 fi
 chmod +x /root/passwall-auto-switch.sh
 
+# Telegram бот с кнопками
 cat > /root/passwall-telegram-bot.sh << 'BOT'
 #!/bin/sh
 CONFIG="/root/passwall-bot.conf"
@@ -256,11 +260,14 @@ BOT
 
 chmod +x /root/passwall-telegram-bot.sh
 
+# Настройка cron
 . /root/passwall-bot.conf
+CHECK_INTERVAL=${CHECK_INTERVAL:-5}
 sed -i '/passwall-auto-switch.sh/d' /etc/crontabs/root 2>/dev/null
 [ "$CHECK_INTERVAL" -gt 0 ] && echo "*/$CHECK_INTERVAL * * * * /root/passwall-auto-switch.sh" >> /etc/crontabs/root
 /etc/init.d/cron restart
 
+# Запуск бота
 pkill -f "passwall-telegram-bot" 2>/dev/null
 nohup /root/passwall-telegram-bot.sh > /dev/null 2>&1 &
 
@@ -268,5 +275,5 @@ touch /var/log/passwall-switch.log
 
 echo ""
 echo "========================================="
-echo "Done! Send /status to your bot in Telegram"
+echo "✅ DONE! Send /status to your bot in Telegram"
 echo "========================================="
