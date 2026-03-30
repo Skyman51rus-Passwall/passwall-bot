@@ -7,4 +7,4 @@
 Подключись к роутеру по SSH и выполни:
 
 ```bash
-curl -s https://raw.githubusercontent.com/ТВОЙ_ЛОГИН/passwall-bot/main/install.sh | sh
+curl -s https://raw.githubusercontent.com/Skyman51rus-Passwall/passwall-bot/main/install.sh | sh
