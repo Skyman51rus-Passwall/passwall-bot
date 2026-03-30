@@ -147,7 +147,7 @@ SCRIPT
     chmod +x /root/passwall-auto-switch.sh
 fi
 
-# Telegram бот
+# Telegram бот (упрощенная версия)
 cat > /root/passwall-telegram-bot.sh << 'BOTSCRIPT'
 #!/bin/sh
 CONFIG="/root/passwall-bot.conf"
