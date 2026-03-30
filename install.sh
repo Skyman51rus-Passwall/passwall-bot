@@ -2,95 +2,30 @@
 
 echo ""
 echo "========================================="
-echo "  🤖 PassWall + Telegram Bot Installer"
-echo "  github.com/Skyman51rus-Passwall/passwall-bot"
+echo "  PassWall Bot Installer"
 echo "========================================="
 echo ""
 
-# Проверка наличия PassWall
-PW1_INSTALLED=$(ls /etc/init.d/passwall 2>/dev/null)
-PW2_INSTALLED=$(ls /etc/init.d/passwall2 2>/dev/null)
-
-if [ -z "$PW1_INSTALLED" ] && [ -z "$PW2_INSTALLED" ]; then
-    echo "⚠️  PassWall не обнаружен"
-    echo ""
-    echo "Выбери действие:"
-    echo "   1 - Установить PassWall 1"
-    echo "   2 - Установить PassWall 2"
-    echo "   0 - Пропустить"
-    printf "Выбери 1, 2 или 0: "
-    read INSTALL_PW
-    
-    case "$INSTALL_PW" in
-        1)
-            echo ""
-            echo "Установка PassWall 1..."
-            rm -f /tmp/passwall.sh
-            wget -q https://raw.githubusercontent.com/amirhosseinchoghaei/Passwall/main/passwall.sh -O /tmp/passwall.sh
-            chmod 777 /tmp/passwall.sh
-            sh /tmp/passwall.sh
-            ;;
-        2)
-            echo ""
-            echo "Установка PassWall 2..."
-            rm -f /tmp/passwall2x.sh
-            wget -q https://raw.githubusercontent.com/amirhosseinchoghaei/Passwall/main/passwall2x.sh -O /tmp/passwall2x.sh
-            chmod 777 /tmp/passwall2x.sh
-            sh /tmp/passwall2x.sh
-            ;;
-        0)
-            echo "Пропускаем установку PassWall"
-            ;;
-        *)
-            echo "Неверный выбор, пропускаем установку PassWall"
-            ;;
-    esac
-    echo ""
-fi
-
-echo ""
-echo "========================================="
-echo "  Telegram Bot Setup"
-echo "========================================="
-echo ""
-
-echo "1. Открой Telegram, найди @BotFather"
-echo "2. Отправь команду /newbot"
-echo "3. Введи имя бота, например MyRouterBot"
-echo "4. Введи username, должно заканчиваться на _bot"
-echo "5. Скопируй полученный токен"
-echo ""
-printf "Введи токен бота: "
+printf "Bot token from @BotFather: "
 read BOT_TOKEN
 
-echo ""
-echo "1. Найди @userinfobot в Telegram"
-echo "2. Отправь ему команду /start"
-echo "3. Скопируй свой ID цифрами"
-echo ""
-printf "Введи свой Chat ID: "
+printf "Your Chat ID from @userinfobot: "
 read CHAT_ID
 
-echo ""
-echo "Выбери версию PassWall для бота:"
-echo "   1 - PassWall 1"
-echo "   2 - PassWall 2"
-printf "Выбери 1 или 2: "
+printf "PassWall version 1 or 2: "
 read PW_VER
 
-echo ""
-echo "Настройки мониторинга:"
-printf "Интервал проверки в минутах (по умолч 5): "
+printf "Check interval in minutes default 5: "
 read CHECK_INT
 [ -z "$CHECK_INT" ] && CHECK_INT=5
-printf "Максимальная задержка в мс (по умолч 1500): "
+
+printf "Max latency ms default 1500: "
 read MAX_LAT
 [ -z "$MAX_LAT" ] && MAX_LAT=1500
 
 echo ""
-echo "Установка бота..."
+echo "Installing..."
 
-# Конфиг
 cat > /root/passwall-bot.conf << CFG
 CHECK_INTERVAL=$CHECK_INT
 MAX_LATENCY=$MAX_LAT
@@ -98,7 +33,6 @@ BOT_TOKEN="$BOT_TOKEN"
 CHAT_ID="$CHAT_ID"
 CFG
 
-# Основной скрипт мониторинга
 if [ "$PW_VER" = "2" ]; then
 cat > /root/passwall-auto-switch.sh << 'SCRIPT'
 #!/bin/sh
@@ -176,7 +110,6 @@ SCRIPT
 fi
 chmod +x /root/passwall-auto-switch.sh
 
-# Telegram бот с кнопками
 cat > /root/passwall-telegram-bot.sh << 'BOT'
 #!/bin/sh
 CONFIG="/root/passwall-bot.conf"
@@ -184,28 +117,16 @@ CONFIG="/root/passwall-bot.conf"
 LOG_FILE="/var/log/passwall-switch.log"
 
 send_message() {
-    local text="$1"
-    local keyboard="$2"
-    if [ -n "$keyboard" ]; then
-        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${CHAT_ID}" -d "text=${text}" -d "parse_mode=HTML" \
-            -d "reply_markup=$keyboard" > /dev/null 2>&1
-    else
-        curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${CHAT_ID}" -d "text=${text}" -d "parse_mode=HTML" > /dev/null 2>&1
-    fi
+    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+        -d "chat_id=${CHAT_ID}" -d "text=$1" -d "parse_mode=HTML" > /dev/null 2>&1
 }
 
 get_keyboard() {
-    cat << 'KB'
-{"inline_keyboard":[[{"text":"📊 Статус","callback_data":"status"},{"text":"📋 Лог","callback_data":"log"}],[{"text":"🔄 Переключить","callback_data":"switch"},{"text":"🔄 Перезапуск","callback_data":"restart"}],[{"text":"📥 Обновить","callback_data":"update"},{"text":"⚙️ Настройки","callback_data":"settings"}],[{"text":"❌ Скрыть","callback_data":"hide"}]]}
-KB
+    echo '{"inline_keyboard":[[{"text":"📊 Status","callback_data":"status"},{"text":"📋 Log","callback_data":"log"}],[{"text":"🔄 Switch","callback_data":"switch"},{"text":"🔄 Restart","callback_data":"restart"}],[{"text":"📥 Update","callback_data":"update"},{"text":"⚙️ Settings","callback_data":"settings"}],[{"text":"❌ Hide","callback_data":"hide"}]]}'
 }
 
 get_settings_keyboard() {
-    cat << 'KB'
-{"inline_keyboard":[[{"text":"⏱️ 1 мин","callback_data":"set_1"},{"text":"⏱️ 5 мин","callback_data":"set_5"},{"text":"⏱️ 10 мин","callback_data":"set_10"}],[{"text":"⏱️ 30 мин","callback_data":"set_30"},{"text":"⏱️ Откл","callback_data":"set_0"}],[{"text":"⚡ 800ms","callback_data":"lat_800"},{"text":"⚡ 1500ms","callback_data":"lat_1500"},{"text":"⚡ 3000ms","callback_data":"lat_3000"}],[{"text":"◀️ Назад","callback_data":"back"}]]}
-KB
+    echo '{"inline_keyboard":[[{"text":"⏱️ 1 min","callback_data":"set_1"},{"text":"⏱️ 5 min","callback_data":"set_5"},{"text":"⏱️ 10 min","callback_data":"set_10"}],[{"text":"⏱️ 30 min","callback_data":"set_30"},{"text":"⏱️ Off","callback_data":"set_0"}],[{"text":"⚡ 800ms","callback_data":"lat_800"},{"text":"⚡ 1500ms","callback_data":"lat_1500"},{"text":"⚡ 3000ms","callback_data":"lat_3000"}],[{"text":"◀️ Back","callback_data":"back"}]]}'
 }
 
 check_status() {
@@ -220,45 +141,44 @@ cat >> /root/passwall-telegram-bot.sh << 'BOT'
     remark=$(uci -q get passwall."$current".remarks 2>/dev/null)
     latency=$(curl -o /dev/null -s -w "%{time_total}" --max-time 3 "https://www.gstatic.com/generate_204" 2>/dev/null)
     ms=$(awk "BEGIN {print int($latency * 1000)}" 2>/dev/null)
-    interval=${CHECK_INTERVAL:-5}
     if [ -n "$ms" ] && [ "$ms" -lt "${MAX_LATENCY:-1500}" ] && [ "$ms" -gt 0 ]; then
-        send_message "✅ ONLINE\nСервер: $current\n$remark\nПинг: ${ms}ms\nПроверка: каждые $interval мин" "$(get_keyboard)"
+        send_message "✅ ONLINE\nServer: $current\n$remark\nPing: ${ms}ms\nCheck: ${CHECK_INTERVAL:-5} min" "$(get_keyboard)"
     else
-        send_message "❌ OFFLINE\nСервер: $current\n$remark\nПинг: ${ms:-0}ms" "$(get_keyboard)"
+        send_message "❌ OFFLINE\nServer: $current\n$remark\nPing: ${ms:-0}ms" "$(get_keyboard)"
     fi
 }
 
 show_settings() {
-    send_message "⚙️ НАСТРОЙКИ\n\n⏱️ Интервал: ${CHECK_INTERVAL:-5} мин\n⚡ Задержка: ${MAX_LATENCY:-1500} мс\n\nНажми кнопку для изменения:" "$(get_settings_keyboard)"
+    send_message "⚙️ SETTINGS\n\nInterval: ${CHECK_INTERVAL:-5} min\nMax latency: ${MAX_LATENCY:-1500} ms" "$(get_settings_keyboard)"
 }
 
 send_log() {
     log_text=$(tail -20 "$LOG_FILE" 2>/dev/null | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
-    [ -n "$log_text" ] && send_message "📋 ПОСЛЕДНИЙ ЛОГ:\n<code>$log_text</code>" "$(get_keyboard)" || send_message "❌ Лог пуст" "$(get_keyboard)"
+    [ -n "$log_text" ] && send_message "📋 LOG:\n$log_text" "$(get_keyboard)" || send_message "❌ Log empty" "$(get_keyboard)"
 }
 
 switch_node() {
-    send_message "🔄 Переключение..." ""
+    send_message "🔄 Switching..." ""
     /root/passwall-auto-switch.sh > /dev/null 2>&1
     sleep 2
     check_status
 }
 
 restart_passwall() {
-    send_message "🔄 Перезапуск PassWall..." ""
+    send_message "🔄 Restarting PassWall..." ""
     /etc/init.d/passwall restart
     sleep 3
-    send_message "✅ PassWall перезапущен" "$(get_keyboard)"
+    send_message "✅ PassWall restarted" "$(get_keyboard)"
     check_status
 }
 
 update_subscriptions() {
-    send_message "🔄 Обновление подписок..." ""
+    send_message "🔄 Updating subscriptions..." ""
     lua /usr/share/passwall/subscribe.lua start 2>/dev/null
     sleep 5
     /etc/init.d/passwall restart
     sleep 3
-    send_message "✅ Подписки обновлены" "$(get_keyboard)"
+    send_message "✅ Subscriptions updated" "$(get_keyboard)"
     check_status
 }
 
@@ -268,14 +188,14 @@ set_interval() {
     [ "$1" -gt 0 ] && echo "*/$1 * * * * /root/passwall-auto-switch.sh" >> /etc/crontabs/root
     /etc/init.d/cron restart
     CHECK_INTERVAL=$1
-    send_message "✅ Интервал изменен на $1 минут" "$(get_keyboard)"
+    send_message "✅ Interval set to $1 min" "$(get_keyboard)"
     show_settings
 }
 
 set_latency() {
     sed -i "s/MAX_LATENCY=.*/MAX_LATENCY=$1/" /root/passwall-bot.conf
     MAX_LATENCY=$1
-    send_message "✅ Задержка изменена на ${1} мс" "$(get_keyboard)"
+    send_message "✅ Max latency set to ${1} ms" "$(get_keyboard)"
     show_settings
 }
 
@@ -322,7 +242,7 @@ process_updates() {
                     "/restart") restart_passwall ;;
                     "/update") update_subscriptions ;;
                     "/settings") show_settings ;;
-                    "/help") send_message "🤖 КОМАНДЫ БОТА:\n/status - статус\n/log - лог\n/switch - переключить\n/restart - перезапуск\n/update - обновить\n/settings - настройки\n\nТакже есть КНОПКИ под сообщениями!" "$(get_keyboard)" ;;
+                    "/help") send_message "Commands: /status, /log, /switch, /restart, /update, /settings" "$(get_keyboard)" ;;
                 esac
             fi
         done
@@ -330,49 +250,23 @@ process_updates() {
     done
 }
 
-send_message "🤖 PassWall БОТ ЗАПУЩЕН!\n\n✅ Проверка: ${CHECK_INTERVAL:-5} мин\n⚡ Задержка: ${MAX_LATENCY:-1500} мс\n\n📌 КОМАНДЫ:\n/status - статус\n/log - лог\n/switch - переключить\n/restart - перезапуск\n/update - обновить\n/settings - настройки\n\n👇 Нажми на кнопки под этим сообщением!" "$(get_keyboard)"
+send_message "PassWall Bot Started\nCheck: ${CHECK_INTERVAL:-5} min\nLatency: ${MAX_LATENCY:-1500} ms\n\nCommands: /status, /log, /switch, /restart, /update, /settings" "$(get_keyboard)"
 process_updates
 BOT
 
 chmod +x /root/passwall-telegram-bot.sh
 
-# Настройка cron
 . /root/passwall-bot.conf
-CHECK_INTERVAL=${CHECK_INTERVAL:-5}
 sed -i '/passwall-auto-switch.sh/d' /etc/crontabs/root 2>/dev/null
 [ "$CHECK_INTERVAL" -gt 0 ] && echo "*/$CHECK_INTERVAL * * * * /root/passwall-auto-switch.sh" >> /etc/crontabs/root
 /etc/init.d/cron restart
 
-# Запуск бота
 pkill -f "passwall-telegram-bot" 2>/dev/null
 nohup /root/passwall-telegram-bot.sh > /dev/null 2>&1 &
-
-# Автозапуск
-if ! grep -q "passwall-telegram-bot.sh" /etc/rc.local 2>/dev/null; then
-    sed -i '/exit 0/d' /etc/rc.local 2>/dev/null
-    echo "nohup /root/passwall-telegram-bot.sh > /dev/null 2>&1 &" >> /etc/rc.local
-    echo "exit 0" >> /etc/rc.local
-    chmod +x /etc/rc.local
-fi
 
 touch /var/log/passwall-switch.log
 
 echo ""
 echo "========================================="
-echo "✅ УСТАНОВКА ЗАВЕРШЕНА!"
-echo "========================================="
-echo ""
-echo "📱 Открой Telegram и отправь боту: /status"
-echo "🔘 Под сообщением появятся КНОПКИ"
-echo ""
-echo "Твои настройки:"
-if [ "$PW_VER" = "2" ]; then
-    echo "   Версия для бота: PassWall 2"
-else
-    echo "   Версия для бота: PassWall 1"
-fi
-echo "   Интервал: $CHECK_INTERVAL мин"
-echo "   Задержка: $MAX_LAT мс"
-echo ""
-echo "📋 Лог: tail -f /var/log/passwall-switch.log"
+echo "Done! Send /status to your bot in Telegram"
 echo "========================================="
