@@ -12,19 +12,19 @@ PW1_INSTALLED=$(ls /etc/init.d/passwall 2>/dev/null)
 PW2_INSTALLED=$(ls /etc/init.d/passwall2 2>/dev/null)
 
 if [ -z "$PW1_INSTALLED" ] && [ -z "$PW2_INSTALLED" ]; then
-    echo "⚠️  PassWall не обнаружен!"
+    echo "⚠️  PassWall не обнаружен"
     echo ""
     echo "Выбери действие:"
-    echo "   1 - Установить PassWall 1 (рекомендуется для 128MB RAM)"
-    echo "   2 - Установить PassWall 2 (требуется 256+ MB RAM)"
-    echo "   0 - Пропустить (если PassWall уже установлен вручную)"
-    printf "👉 Выбери 1, 2 или 0: "
+    echo "   1 - Установить PassWall 1"
+    echo "   2 - Установить PassWall 2"
+    echo "   0 - Пропустить"
+    printf "Выбери 1, 2 или 0: "
     read INSTALL_PW
     
     case "$INSTALL_PW" in
         1)
             echo ""
-            echo "🔄 Установка PassWall 1..."
+            echo "Установка PassWall 1..."
             rm -f /tmp/passwall.sh
             wget -q https://raw.githubusercontent.com/amirhosseinchoghaei/Passwall/main/passwall.sh -O /tmp/passwall.sh
             chmod 777 /tmp/passwall.sh
@@ -32,17 +32,17 @@ if [ -z "$PW1_INSTALLED" ] && [ -z "$PW2_INSTALLED" ]; then
             ;;
         2)
             echo ""
-            echo "🔄 Установка PassWall 2..."
+            echo "Установка PassWall 2..."
             rm -f /tmp/passwall2x.sh
             wget -q https://raw.githubusercontent.com/amirhosseinchoghaei/Passwall/main/passwall2x.sh -O /tmp/passwall2x.sh
             chmod 777 /tmp/passwall2x.sh
             sh /tmp/passwall2x.sh
             ;;
         0)
-            echo "⏭️  Пропускаем установку PassWall"
+            echo "Пропускаем установку PassWall"
             ;;
         *)
-            echo "❌ Неверный выбор, пропускаем установку PassWall"
+            echo "Неверный выбор, пропускаем установку PassWall"
             ;;
     esac
     echo ""
@@ -50,47 +50,45 @@ fi
 
 echo ""
 echo "========================================="
-echo "  🤖 Telegram Bot Setup"
+echo "  Telegram Bot Setup"
 echo "========================================="
 echo ""
 
-echo "📌 КАК СОЗДАТЬ БОТА:"
-echo "   1. Открой Telegram, найди @BotFather"
-echo "   2. Отправь команду /newbot"
-echo "   3. Введи имя бота, например MyRouterBot"
-echo "   4. Введи username, должно заканчиваться на _bot"
-echo "   5. Скопируй полученный токен"
+echo "1. Открой Telegram, найди @BotFather"
+echo "2. Отправь команду /newbot"
+echo "3. Введи имя бота, например MyRouterBot"
+echo "4. Введи username, должно заканчиваться на _bot"
+echo "5. Скопируй полученный токен"
 echo ""
-printf "🔑 Введи токен бота: "
+printf "Введи токен бота: "
 read BOT_TOKEN
 
 echo ""
-echo "📌 КАК ПОЛУЧИТЬ CHAT ID:"
-echo "   1. Найди @userinfobot в Telegram"
-echo "   2. Отправь ему команду /start"
-echo "   3. Скопируй свой ID цифрами"
+echo "1. Найди @userinfobot в Telegram"
+echo "2. Отправь ему команду /start"
+echo "3. Скопируй свой ID цифрами"
 echo ""
-printf "🆔 Введи свой Chat ID: "
+printf "Введи свой Chat ID: "
 read CHAT_ID
 
 echo ""
-echo "📌 ВЫБЕРИ ВЕРСИЮ PASSWALL ДЛЯ БОТА:"
+echo "Выбери версию PassWall для бота:"
 echo "   1 - PassWall 1"
 echo "   2 - PassWall 2"
-printf "👉 Выбери 1 или 2: "
+printf "Выбери 1 или 2: "
 read PW_VER
 
 echo ""
-echo "📌 НАСТРОЙКИ МОНИТОРИНГА:"
-printf "⏱️  Интервал проверки в минутах, по умолч 5: "
+echo "Настройки мониторинга:"
+printf "Интервал проверки в минутах (по умолч 5): "
 read CHECK_INT
 [ -z "$CHECK_INT" ] && CHECK_INT=5
-printf "⚡ Максимальная задержка в мс, по умолч 1500: "
+printf "Максимальная задержка в мс (по умолч 1500): "
 read MAX_LAT
 [ -z "$MAX_LAT" ] && MAX_LAT=1500
 
 echo ""
-echo "🔄 Установка бота..."
+echo "Установка бота..."
 
 # Конфиг
 cat > /root/passwall-bot.conf << CFG
@@ -365,9 +363,9 @@ echo "✅ УСТАНОВКА ЗАВЕРШЕНА!"
 echo "========================================="
 echo ""
 echo "📱 Открой Telegram и отправь боту: /status"
-echo "🔘 Под сообщением появятся КНОПКИ!"
+echo "🔘 Под сообщением появятся КНОПКИ"
 echo ""
-echo "📌 ТВОИ НАСТРОЙКИ:"
+echo "Твои настройки:"
 if [ "$PW_VER" = "2" ]; then
     echo "   Версия для бота: PassWall 2"
 else
